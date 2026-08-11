@@ -1,5 +1,6 @@
 import type { Reel } from "@/lib/types";
 import { formatCompactNumber, formatDuration, formatRelativeDate } from "@/lib/format";
+import TranscriptCell from "./TranscriptCell";
 
 export default function TranscriptTable({ reels }: { reels: Reel[] }) {
   return (
@@ -14,7 +15,6 @@ export default function TranscriptTable({ reels }: { reels: Reel[] }) {
             <th className="px-4 py-3 text-right">Likes</th>
             <th className="px-4 py-3 text-right">Comments</th>
             <th className="px-4 py-3 text-right">Views</th>
-            <th className="px-4 py-3 text-right">Shares</th>
             <th className="px-4 py-3">Transcript</th>
           </tr>
         </thead>
@@ -40,17 +40,8 @@ export default function TranscriptTable({ reels }: { reels: Reel[] }) {
               <td className="whitespace-nowrap px-4 py-3 text-right font-medium">
                 {formatCompactNumber(reel.videoViewCount)}
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-right font-medium">
-                {reel.sharesCount !== null ? formatCompactNumber(reel.sharesCount) : "—"}
-              </td>
               <td className="min-w-[320px] max-w-[420px] px-4 py-3">
-                {reel.transcript ? (
-                  <div className="max-h-32 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-muted">
-                    {reel.transcript}
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted">No transcript</span>
-                )}
+                <TranscriptCell reel={reel} />
               </td>
             </tr>
           ))}

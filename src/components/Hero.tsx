@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 export default function Hero({ children }: { children: ReactNode }) {
   return (
-    <section className="bg-grid relative overflow-hidden px-4 pb-16 pt-20 sm:pt-28">
+    <section className="relative overflow-hidden px-4 pb-16 pt-20 sm:pt-28">
       <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
         <span className="mb-6 rounded-full border border-white/10 bg-surface px-4 py-1.5 text-xs font-medium text-muted">
           Public reels, unpacked in seconds

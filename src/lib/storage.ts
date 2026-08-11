@@ -54,3 +54,21 @@ export function removeSearch(username: string): SavedSearch[] {
   notifyChanged();
   return next;
 }
+
+export function updateReelTranscript(
+  username: string,
+  reelId: string,
+  transcript: string
+): SavedSearch[] {
+  if (!isBrowser()) return [];
+  const next = getSavedSearches().map((s) => {
+    if (s.username.toLowerCase() !== username.toLowerCase()) return s;
+    return {
+      ...s,
+      reels: s.reels.map((r) => (r.id === reelId ? { ...r, transcript } : r)),
+    };
+  });
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  notifyChanged();
+  return next;
+}
