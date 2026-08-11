@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Reel } from "@/lib/types";
 import { formatCompactNumber, formatDuration, formatRelativeDate } from "@/lib/format";
+import { proxiedMediaUrl } from "@/lib/media";
 import { usePlayback } from "./PlaybackContext";
 import StatBadge from "./StatBadge";
 import {
@@ -45,11 +46,19 @@ export default function ReelCard({ reel, index }: { reel: Reel; index: number })
   return (
     <article className="glow-border flex flex-col overflow-hidden rounded-2xl bg-surface transition data-[active=true]:glow-border-active" data-active={isActive}>
       <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
-        {reel.videoUrl ? (
+        {reel.displayUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={proxiedMediaUrl(reel.displayUrl)}
+            alt={reel.caption || "Reel thumbnail"}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+
+        {reel.videoUrl && (
           <video
             ref={videoRef}
-            src={reel.videoUrl}
-            poster={reel.displayUrl || undefined}
+            src={proxiedMediaUrl(reel.videoUrl)}
             playsInline
             controls={isActive && isPlaying}
             onPlay={() => {
@@ -58,16 +67,13 @@ export default function ReelCard({ reel, index }: { reel: Reel; index: number })
             }}
             onPause={() => setIsPlaying(false)}
             onEnded={() => setIsPlaying(false)}
-            className="h-full w-full object-cover"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity ${
+              isPlaying ? "opacity-100" : "opacity-0"
+            }`}
           />
-        ) : reel.displayUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={reel.displayUrl}
-            alt={reel.caption || "Reel thumbnail"}
-            className="h-full w-full object-cover"
-          />
-        ) : (
+        )}
+
+        {!reel.displayUrl && !reel.videoUrl && (
           <div className="flex h-full w-full items-center justify-center text-xs text-muted">
             No preview
           </div>

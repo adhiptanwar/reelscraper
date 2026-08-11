@@ -25,7 +25,7 @@ export default function Hero({ children }: { children: ReactNode }) {
         <div className="mt-9 w-full">{children}</div>
 
         <p className="mt-4 text-xs text-muted">
-          Public accounts only · No login required · Powered by Apify
+          Public accounts only · No login required
         </p>
       </div>
     </section>

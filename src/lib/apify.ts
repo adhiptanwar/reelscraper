@@ -4,6 +4,22 @@ import type { Reel } from "./types";
 const ACTOR_ID = "apify/instagram-reel-scraper";
 const RESULTS_LIMIT = 5;
 
+export class UnscrapableAccountError extends Error {
+  constructor(username: string) {
+    super(
+      `@${username} couldn't be scraped — the account is private, doesn't exist, or has no public reels.`
+    );
+    this.name = "UnscrapableAccountError";
+  }
+}
+
+// The actor returns a placeholder item instead of a reel when it can't read
+// a profile, e.g. { url, inputUrl, error: "no_items", errorDescription: "..." }.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isErrorItem(item: Record<string, any>): boolean {
+  return typeof item.error === "string";
+}
+
 function getClient(): ApifyClient {
   const token = process.env.APIFY_TOKEN;
   if (!token) {
@@ -55,5 +71,17 @@ export async function fetchReelsForHandle(username: string): Promise<Reel[]> {
 
   const { items } = await client.dataset(run.defaultDatasetId).listItems();
 
-  return items.slice(0, RESULTS_LIMIT).map(toReel);
+  const reelItems = items.filter((item) => !isErrorItem(item));
+
+  if (reelItems.length === 0) {
+    throw new UnscrapableAccountError(username);
+  }
+
+  reelItems.sort((a, b) => {
+    const aTime = new Date(String(a.timestamp ?? 0)).getTime();
+    const bTime = new Date(String(b.timestamp ?? 0)).getTime();
+    return bTime - aTime;
+  });
+
+  return reelItems.slice(0, RESULTS_LIMIT).map(toReel);
 }

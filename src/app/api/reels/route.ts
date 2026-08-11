@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchReelsForHandle } from "@/lib/apify";
+import { fetchReelsForHandle, UnscrapableAccountError } from "@/lib/apify";
 import { normalizeHandle } from "@/lib/format";
+import { getMockReels, MOCK_HANDLE } from "@/lib/mockReels";
 import type { ReelsApiResponse } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -33,21 +34,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (username.toLowerCase() === MOCK_HANDLE) {
+    return NextResponse.json<ReelsApiResponse>({
+      ok: true,
+      username: MOCK_HANDLE,
+      reels: getMockReels(),
+    });
+  }
+
   try {
     const reels = await fetchReelsForHandle(username);
-
-    if (reels.length === 0) {
+    return NextResponse.json<ReelsApiResponse>({ ok: true, username, reels });
+  } catch (error) {
+    if (error instanceof UnscrapableAccountError) {
       return NextResponse.json<ReelsApiResponse>(
-        {
-          ok: false,
-          error: `No reels found for @${username}. The account may be private or have no reels.`,
-        },
+        { ok: false, error: error.message },
         { status: 404 }
       );
     }
 
-    return NextResponse.json<ReelsApiResponse>({ ok: true, username, reels });
-  } catch (error) {
     console.error("Failed to fetch reels", error);
     const message =
       error instanceof Error ? error.message : "Something went wrong fetching reels.";
