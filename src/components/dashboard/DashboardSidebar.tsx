@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { removeSearch } from "@/lib/storage";
-import { DashboardIcon, ExternalLinkIcon, TrashIcon } from "@/components/icons";
+import { DashboardIcon, TrashIcon } from "@/components/icons";
+import UserProfile from "./UserProfile";
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ user }: { user: User }) {
   const pathname = usePathname();
   const router = useRouter();
   const { searches } = useSavedSearches();
@@ -92,13 +94,7 @@ export default function DashboardSidebar() {
       </div>
 
       <div className="border-t border-white/10 px-3 py-3">
-        <Link
-          href="/"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted transition hover:bg-white/[0.04] hover:text-foreground"
-        >
-          <ExternalLinkIcon />
-          Back to site
-        </Link>
+        <UserProfile user={user} />
       </div>
     </aside>
   );

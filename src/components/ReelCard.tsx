@@ -12,7 +12,6 @@ import {
   EyeIcon,
   HeartIcon,
   PlayIcon,
-  ShareIcon,
   TranscriptIcon,
 } from "./icons";
 
@@ -119,13 +118,6 @@ export default function ReelCard({ reel, index }: { reel: Reel; index: number })
             label="Views"
             value={formatCompactNumber(reel.videoViewCount)}
           />
-          {reel.sharesCount !== null && (
-            <StatBadge
-              icon={<ShareIcon />}
-              label="Shares"
-              value={formatCompactNumber(reel.sharesCount)}
-            />
-          )}
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-muted">

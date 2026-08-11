@@ -17,7 +17,11 @@ export default function CompactReelRow({ reels }: { reels: Reel[] }) {
       </div>
 
       {expandedReel && (
-        <ReelModal reel={expandedReel} onClose={() => setExpandedReel(null)} />
+        <ReelModal
+          key={expandedReel.id}
+          reel={expandedReel}
+          onClose={() => setExpandedReel(null)}
+        />
       )}
     </>
   );

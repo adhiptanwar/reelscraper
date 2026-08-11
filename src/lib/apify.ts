@@ -45,10 +45,6 @@ function toReel(item: Record<string, any>): Reel {
     commentsCount: Number(item.commentsCount ?? 0),
     videoViewCount: Number(item.videoViewCount ?? item.videoPlayCount ?? 0),
     videoPlayCount: Number(item.videoPlayCount ?? 0),
-    sharesCount:
-      item.sharesCount === undefined || item.sharesCount === null
-        ? null
-        : Number(item.sharesCount),
     videoDuration: Number(item.videoDuration ?? 0),
     videoUrl: String(item.videoUrl ?? ""),
     audioUrl: item.audioUrl ? String(item.audioUrl) : null,
@@ -65,7 +61,6 @@ export async function fetchReelsForHandle(username: string): Promise<Reel[]> {
     username: [username],
     resultsLimit: RESULTS_LIMIT,
     includeTranscript: true,
-    includeSharesCount: true,
     skipPinnedPosts: false,
   });
 

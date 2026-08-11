@@ -16,7 +16,6 @@ export type Reel = {
   commentsCount: number;
   videoViewCount: number;
   videoPlayCount: number;
-  sharesCount: number | null;
   videoDuration: number;
   videoUrl: string;
   audioUrl: string | null;

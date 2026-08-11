@@ -11,7 +11,7 @@ export default function DashboardHomePage() {
   });
 
   return (
-    <div className="bg-grid flex h-full min-h-screen flex-col items-center justify-center px-4">
+    <div className="flex h-full min-h-screen flex-col items-center justify-center px-4">
       <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
         <span className="mb-6 rounded-full border border-white/10 bg-surface px-4 py-1.5 text-xs font-medium text-muted">
           Scrape a new profile

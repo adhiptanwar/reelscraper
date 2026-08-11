@@ -44,7 +44,6 @@ export function getMockReels(): Reel[] {
     const likes = Math.round((800 + i * 3200) * (1 + (i % 3) * 0.4));
     const views = likes * (12 + i * 2);
     const comments = Math.round(likes * 0.02) + 8;
-    const shares = Math.round(likes * 0.015) + 3;
 
     return {
       id: `mock-${i + 1}`,
@@ -59,7 +58,6 @@ export function getMockReels(): Reel[] {
       commentsCount: comments,
       videoViewCount: views,
       videoPlayCount: Math.round(views * 1.3),
-      sharesCount: shares,
       videoDuration: 14 + i * 9.5,
       videoUrl: "",
       audioUrl: null,
