@@ -16,17 +16,12 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted sm:flex">
-          <a href="#how-it-works" className="transition hover:text-foreground">
-            How it works
-          </a>
-          <a
-            href="https://apify.com/apify/instagram-reel-scraper"
-            target="_blank"
-            rel="noreferrer"
-            className="transition hover:text-foreground"
-          >
-            Powered by Apify
-          </a>
+          <Link href="/" className="transition hover:text-foreground">
+            Home
+          </Link>
+          <Link href="/dashboard" className="transition hover:text-foreground">
+            Dashboard
+          </Link>
         </nav>
       </div>
     </header>
