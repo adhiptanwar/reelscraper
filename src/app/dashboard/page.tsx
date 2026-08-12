@@ -3,11 +3,15 @@
 import { useRouter } from "next/navigation";
 import SearchForm from "@/components/SearchForm";
 import { useReelSearch } from "@/hooks/useReelSearch";
+import { saveSearch } from "@/lib/searches";
 
 export default function DashboardHomePage() {
   const router = useRouter();
-  const { isLoading, error, search } = useReelSearch((username) => {
-    router.push(`/dashboard/${username.toLowerCase()}`);
+  const { isLoading, error, search } = useReelSearch({
+    onSuccess: async (username, reels) => {
+      await saveSearch(username, reels);
+      router.push(`/dashboard/${username.toLowerCase()}`);
+    },
   });
 
   return (

@@ -26,4 +26,4 @@ export type Reel = {
 
 export type ReelsApiResponse =
   | { ok: true; username: string; reels: Reel[] }
-  | { ok: false; error: string };
+  | { ok: false; error: string; code?: "AUTH_REQUIRED" };

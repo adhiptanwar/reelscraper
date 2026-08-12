@@ -1,10 +1,15 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { saveSearch } from "@/lib/storage";
 import type { Reel, ReelsApiResponse } from "@/lib/types";
 
-export function useReelSearch(onSaved?: (username: string, reels: Reel[]) => void) {
+type UseReelSearchOptions = {
+  onSuccess?: (username: string, reels: Reel[]) => void;
+  onAuthRequired?: () => void;
+};
+
+export function useReelSearch(options?: UseReelSearchOptions) {
+  const { onSuccess, onAuthRequired } = options ?? {};
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reels, setReels] = useState<Reel[] | null>(null);
@@ -25,21 +30,24 @@ export function useReelSearch(onSaved?: (username: string, reels: Reel[]) => voi
         const data: ReelsApiResponse = await res.json();
 
         if (!data.ok) {
-          setError(data.error);
+          if (data.code === "AUTH_REQUIRED") {
+            onAuthRequired?.();
+          } else {
+            setError(data.error);
+          }
           return;
         }
 
         setUsername(data.username);
         setReels(data.reels);
-        saveSearch(data.username, data.reels);
-        onSaved?.(data.username, data.reels);
+        onSuccess?.(data.username, data.reels);
       } catch {
         setError("Couldn't reach the server. Please try again.");
       } finally {
         setIsLoading(false);
       }
     },
-    [onSaved]
+    [onSuccess, onAuthRequired]
   );
 
   return { isLoading, error, reels, username, search, setReels, setUsername, setError };

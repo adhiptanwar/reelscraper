@@ -11,29 +11,24 @@ import Footer from "@/components/Footer";
 import AuthGateModal from "@/components/AuthGateModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useReelSearch } from "@/hooks/useReelSearch";
-import { hasUsedFreeScrape, markFreeScrapeUsed } from "@/lib/freeScrape";
+import { saveSearch } from "@/lib/searches";
 
 export default function Home() {
   const { user } = useAuth();
   const [showAuthGate, setShowAuthGate] = useState(false);
-  const { isLoading, error, reels, username, search } = useReelSearch(() => {
-    if (!user) markFreeScrapeUsed();
+  const { isLoading, error, reels, username, search } = useReelSearch({
+    onAuthRequired: () => setShowAuthGate(true),
+    onSuccess: (u, r) => {
+      if (user) saveSearch(u, r);
+    },
   });
-
-  function handleSearch(handle: string) {
-    if (!user && hasUsedFreeScrape()) {
-      setShowAuthGate(true);
-      return;
-    }
-    search(handle);
-  }
 
   return (
     <>
       <Header />
       <main className="flex-1">
         <Hero>
-          <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+          <SearchForm onSearch={search} isLoading={isLoading} />
         </Hero>
 
         {isLoading && <ReelGridSkeleton />}

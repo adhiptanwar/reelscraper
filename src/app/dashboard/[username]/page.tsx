@@ -8,12 +8,15 @@ import { RefreshIcon } from "@/components/icons";
 import { useReelSearch } from "@/hooks/useReelSearch";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { formatRelativeDate } from "@/lib/format";
+import { saveSearch } from "@/lib/searches";
 
 export default function DashboardUserPage() {
   const params = useParams<{ username: string }>();
   const routeUsername = decodeURIComponent(params.username ?? "");
   const { searches, isLoaded } = useSavedSearches();
-  const { isLoading, error, search } = useReelSearch();
+  const { isLoading, error, search } = useReelSearch({
+    onSuccess: (username, reels) => saveSearch(username, reels),
+  });
 
   const active = searches.find(
     (s) => s.username.toLowerCase() === routeUsername.toLowerCase()

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
-import { removeSearch } from "@/lib/storage";
+import { removeSearch } from "@/lib/searches";
 import { DashboardIcon, TrashIcon } from "@/components/icons";
 import UserProfile from "./UserProfile";
 
@@ -13,10 +13,10 @@ export default function DashboardSidebar({ user }: { user: User }) {
   const router = useRouter();
   const { searches } = useSavedSearches();
 
-  function handleRemove(e: React.MouseEvent, username: string) {
+  async function handleRemove(e: React.MouseEvent, username: string) {
     e.preventDefault();
     e.stopPropagation();
-    removeSearch(username);
+    await removeSearch(username);
     if (pathname === `/dashboard/${username.toLowerCase()}`) {
       router.push("/dashboard");
     }
