@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchReelsForHandle, UnscrapableAccountError } from "@/lib/apify";
 import { normalizeHandle } from "@/lib/format";
+import { getClientIp, hashIp } from "@/lib/ipGate";
 import { getMockReels, MOCK_HANDLE } from "@/lib/mockReels";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient as createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ReelsApiResponse } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const HANDLE_PATTERN = /^[a-zA-Z0-9._]{1,30}$/;
+const AUTH_REQUIRED_MESSAGE =
+  "You've used your free scrape. Sign in or create a free account to keep going.";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -42,8 +47,45 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const admin = createAdminClient();
+  const ipHash = hashIp(getClientIp(req));
+
+  // Anonymous visitors get one free scrape ever, tracked server-side by IP
+  // so it can't be bypassed by clearing localStorage or using a private
+  // browsing window. Authenticated users are never gated here.
+  if (!user) {
+    const { data: existing, error: lookupError } = await admin
+      .from("anon_scrapes")
+      .select("id")
+      .eq("ip_hash", ipHash)
+      .limit(1)
+      .maybeSingle();
+
+    if (lookupError) {
+      console.error("Failed to check anon scrape gate", lookupError);
+    } else if (existing) {
+      return NextResponse.json<ReelsApiResponse>(
+        { ok: false, error: AUTH_REQUIRED_MESSAGE, code: "AUTH_REQUIRED" },
+        { status: 403 }
+      );
+    }
+  }
+
   try {
     const reels = await fetchReelsForHandle(username);
+
+    if (!user) {
+      const { error: insertError } = await admin.from("anon_scrapes").insert({ ip_hash: ipHash });
+      if (insertError) {
+        console.error("Failed to record anon scrape", insertError);
+      }
+    }
+
     return NextResponse.json<ReelsApiResponse>({ ok: true, username, reels });
   } catch (error) {
     if (error instanceof UnscrapableAccountError) {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { Reel } from "@/lib/types";
 import { formatCompactNumber, formatRelativeDate } from "@/lib/format";
 import { proxiedMediaUrl } from "@/lib/media";
-import { updateReelTranscript } from "@/lib/storage";
+import { updateReelTranscript } from "@/lib/searches";
 import StatBadge from "@/components/StatBadge";
 import { CheckIcon, CloseIcon, CommentIcon, EyeIcon, HeartIcon } from "@/components/icons";
 
@@ -23,8 +23,8 @@ export default function ReelModal({ reel, onClose }: { reel: Reel; onClose: () =
 
   const isDirty = draft !== savedValue;
 
-  function handleSave() {
-    updateReelTranscript(reel.ownerUsername, reel.id, draft);
+  async function handleSave() {
+    await updateReelTranscript(reel.ownerUsername, reel.id, draft);
     setSavedValue(draft);
     setJustSaved(true);
   }

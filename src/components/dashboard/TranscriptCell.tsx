@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Reel } from "@/lib/types";
-import { updateReelTranscript } from "@/lib/storage";
+import { updateReelTranscript } from "@/lib/searches";
 import { CheckIcon, PencilIcon } from "@/components/icons";
 
 export default function TranscriptCell({ reel }: { reel: Reel }) {
@@ -45,8 +45,8 @@ export default function TranscriptCell({ reel }: { reel: Reel }) {
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => {
-            updateReelTranscript(reel.ownerUsername, reel.id, draft);
+          onClick={async () => {
+            await updateReelTranscript(reel.ownerUsername, reel.id, draft);
             setIsEditing(false);
           }}
           className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-black transition hover:bg-white/90"
