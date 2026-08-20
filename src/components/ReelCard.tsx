@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Reel } from "@/lib/types";
 import { formatCompactNumber, formatDuration, formatRelativeDate } from "@/lib/format";
 import { proxiedMediaUrl } from "@/lib/media";
+import { instagramEmbedUrl } from "@/lib/instagramEmbed";
 import { usePlayback } from "./PlaybackContext";
 import StatBadge from "./StatBadge";
 import {
@@ -17,78 +18,62 @@ import {
 
 export default function ReelCard({ reel, index }: { reel: Reel; index: number }) {
   const { activeId, setActiveId } = usePlayback();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [showTranscript, setShowTranscript] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const isActive = activeId === reel.id;
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (!isActive && !video.paused) {
-      video.pause();
-    }
-  }, [isActive]);
+  const canEmbed = Boolean(reel.shortCode);
+  // Gating on both isActive and isPlaying means that once a different card
+  // becomes active, this one's embed unmounts (stopping playback) even
+  // though isPlaying itself is left stale — no effect needed to reset it.
+  const showEmbed = isActive && isPlaying && canEmbed;
 
   function handlePlayClick() {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      setActiveId(reel.id);
-      video.play();
-    } else {
-      video.pause();
-    }
+    setActiveId(reel.id);
+    setIsPlaying(true);
   }
 
   return (
     <article className="glow-border flex flex-col overflow-hidden rounded-2xl bg-surface transition data-[active=true]:glow-border-active" data-active={isActive}>
       <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
-        {reel.displayUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={proxiedMediaUrl(reel.displayUrl)}
-            alt={reel.caption || "Reel thumbnail"}
-            className="absolute inset-0 h-full w-full object-cover"
+        {showEmbed ? (
+          // Instagram's own embed player — fetches live from Instagram, so
+          // it keeps working long after the raw scraped video URL expires.
+          <iframe
+            src={instagramEmbedUrl(reel.shortCode)}
+            className="absolute inset-0 h-full w-full border-0"
+            allow="autoplay; encrypted-media; fullscreen"
+            allowFullScreen
+            title={reel.caption || "Instagram reel"}
           />
-        )}
+        ) : (
+          <>
+            {reel.displayUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={proxiedMediaUrl(reel.displayUrl)}
+                alt={reel.caption || "Reel thumbnail"}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-muted">
+                No preview
+              </div>
+            )}
 
-        {reel.videoUrl && (
-          <video
-            ref={videoRef}
-            src={proxiedMediaUrl(reel.videoUrl)}
-            playsInline
-            controls={isActive && isPlaying}
-            onPlay={() => {
-              setActiveId(reel.id);
-              setIsPlaying(true);
-            }}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity ${
-              isPlaying ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        )}
-
-        {!reel.displayUrl && !reel.videoUrl && (
-          <div className="flex h-full w-full items-center justify-center text-xs text-muted">
-            No preview
-          </div>
-        )}
-
-        {!isPlaying && (
-          <button
-            type="button"
-            onClick={handlePlayClick}
-            aria-label="Play reel"
-            className="absolute inset-0 flex items-center justify-center bg-black/25 transition hover:bg-black/40"
-          >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur">
-              <PlayIcon />
-            </span>
-          </button>
+            {canEmbed && (
+              <button
+                type="button"
+                onClick={handlePlayClick}
+                aria-label="Play reel"
+                className="absolute inset-0 flex items-center justify-center bg-black/25 transition hover:bg-black/40"
+              >
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur">
+                  <PlayIcon />
+                </span>
+              </button>
+            )}
+          </>
         )}
 
         <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
