@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Reel } from "@/lib/types";
 import { formatCompactNumber, formatRelativeDate } from "@/lib/format";
 import { proxiedMediaUrl } from "@/lib/media";
+import { instagramEmbedUrl } from "@/lib/instagramEmbed";
 import { updateReelTranscript } from "@/lib/searches";
 import StatBadge from "@/components/StatBadge";
 import { CheckIcon, CloseIcon, CommentIcon, EyeIcon, HeartIcon } from "@/components/icons";
@@ -12,6 +13,8 @@ export default function ReelModal({ reel, onClose }: { reel: Reel; onClose: () =
   const [draft, setDraft] = useState(reel.transcript ?? "");
   const [savedValue, setSavedValue] = useState(reel.transcript ?? "");
   const [justSaved, setJustSaved] = useState(false);
+
+  const canEmbed = Boolean(reel.shortCode);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -39,26 +42,25 @@ export default function ReelModal({ reel, onClose }: { reel: Reel; onClose: () =
         className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-surface glow-border-active sm:flex-row"
       >
         <div className="relative aspect-[9/16] w-full shrink-0 bg-black sm:w-72">
-          {reel.displayUrl && (
+          {canEmbed ? (
+            // Instagram's own embed player — fetches live from Instagram,
+            // so it keeps working long after the raw scraped video URL
+            // expires.
+            <iframe
+              src={instagramEmbedUrl(reel.shortCode)}
+              className="absolute inset-0 h-full w-full border-0"
+              allow="autoplay; encrypted-media; fullscreen"
+              allowFullScreen
+              title={reel.caption || "Instagram reel"}
+            />
+          ) : reel.displayUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={proxiedMediaUrl(reel.displayUrl)}
               alt={reel.caption || "Reel"}
               className="absolute inset-0 h-full w-full object-contain"
             />
-          )}
-
-          {reel.videoUrl && (
-            <video
-              src={proxiedMediaUrl(reel.videoUrl)}
-              autoPlay
-              controls
-              playsInline
-              className="absolute inset-0 h-full w-full object-contain"
-            />
-          )}
-
-          {!reel.displayUrl && !reel.videoUrl && (
+          ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-muted">
               No preview
             </div>
